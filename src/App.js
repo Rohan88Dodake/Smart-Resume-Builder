@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 
 /* ═══════════════════════════════ FONTS ═══════════════════════════════ */
 const Fonts = () => (
@@ -382,13 +382,12 @@ function ResumePreview({ data, tKey }) {
   if (t.layout === "th") {
     const hdrBg = t.hdr || t.accent;
     const hdrTxt = t.headerText || t.hdrTxt || "#fff";
-    const isLight = hdrBg.startsWith("#fe")||hdrBg.startsWith("#fc")||hdrBg.startsWith("#f0")||hdrBg==="#fffbeb"||hdrBg==="#fef3c7"||hdrBg==="#fdf2f8"||hdrBg==="#f7fef7";
     return (
       <div style={{fontFamily:`'${font}',sans-serif`,background:t.main}}>
         <div style={{background:hdrBg,padding:"26px 32px 20px",borderBottom:`3px solid ${t.accent}`}}>
           <h1 style={{margin:0,fontSize:26,fontWeight:800,color:hdrTxt,letterSpacing:-0.3}}>{p.name||"Your Name"}</h1>
-          <p style={{margin:"4px 0 12px",fontSize:12,color:isLight?t.accent:hdrTxt,opacity:isLight?1:0.75,fontWeight:600,textTransform:"uppercase",letterSpacing:1}}>{p.title}</p>
-          <ContactRow col={isLight?t.accent:hdrTxt}/>
+          <p style={{margin:"4px 0 12px",fontSize:12,color:hdrTxt,opacity:0.75,fontWeight:600,textTransform:"uppercase",letterSpacing:1}}>{p.title}</p>
+          <ContactRow col={hdrTxt}/>
         </div>
         <div style={{display:"grid",gridTemplateColumns:"1fr 185px"}}>
           <div style={{padding:"16px 24px 24px"}}>
@@ -407,7 +406,6 @@ function ResumePreview({ data, tKey }) {
   if (t.layout === "line") {
     const hdrBg = t.hdr || "#fff";
     const hdrTxt = t.hdrTxt || "#111";
-    const isLight = hdrBg.startsWith("#e")||hdrBg.startsWith("#f")||hdrBg==="#fff";
     return (
       <div style={{fontFamily:`'${font}',sans-serif`,background:t.main||"#fff",padding:"30px 34px"}}>
         <div style={{borderBottom:`3px solid ${t.accent}`,paddingBottom:16,marginBottom:6}}>
@@ -747,7 +745,6 @@ export default function App() {
   const upP = (k,v) => setResume(r=>({...r,personal:{...r.personal,[k]:v}}));
 
   // Generic section updaters
-  const upSec = (sec,arr) => setResume(r=>({...r,[sec]:arr}));
   const addItem = (sec,blank) => setResume(r=>({...r,[sec]:[...r[sec],blank()]}));
   const delItem = (sec,id) => setResume(r=>({...r,[sec]:r[sec].filter(x=>x.id!==id)}));
   const setItem = (sec,id,k,v) => setResume(r=>({...r,[sec]:r[sec].map(x=>x.id===id?{...x,[k]:v}:x)}));
@@ -1063,4 +1060,3 @@ export default function App() {
     </div>
   );
 }
-  
