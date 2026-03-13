@@ -855,14 +855,14 @@ export default function App() {
               </>}
               {tab==="personal"&&<>
                 <div style={{display:"flex",flexWrap:"wrap",gap:"0 10px"}}>
-                  <Inp half label="Full Name" value={resume.personal.name} onChange={v=>upP("name",v)} placeholder="Rohan Dodake"/>
+                  <Inp half label="Full Name" value={resume.personal.name} onChange={v=>upP("name",v)} placeholder="XYZ"/>
                   <Inp half label="Job Title" value={resume.personal.title} onChange={v=>upP("title",v)} placeholder="Software Engineer"/>
-                  <Inp half label="Email" value={resume.personal.email} onChange={v=>upP("email",v)} placeholder="rohan@example.com"/>
-                  <Inp half label="Phone" value={resume.personal.phone} onChange={v=>upP("phone",v)} placeholder="+91 98765 43210"/>
+                  <Inp half label="Email" value={resume.personal.email} onChange={v=>upP("email",v)} placeholder="XYZ@example.com"/>
+                  <Inp half label="Phone" value={resume.personal.phone} onChange={v=>upP("phone",v)} placeholder="+91 9999999999"/>
                   <Inp label="Location" value={resume.personal.location} onChange={v=>upP("location",v)} placeholder="Pune, Maharashtra"/>
-                  <Inp label="LinkedIn URL" value={resume.personal.linkedin} onChange={v=>upP("linkedin",v)} placeholder="linkedin.com/in/rohan"/>
-                  <Inp label="GitHub URL" value={resume.personal.github} onChange={v=>upP("github",v)} placeholder="github.com/rohan"/>
-                  <Inp label="Website / Portfolio" value={resume.personal.website} onChange={v=>upP("website",v)} placeholder="rohan.dev"/>
+                  <Inp label="LinkedIn URL" value={resume.personal.linkedin} onChange={v=>upP("linkedin",v)} placeholder="linkedin.com/in/XYZ"/>
+                  <Inp label="GitHub URL" value={resume.personal.github} onChange={v=>upP("github",v)} placeholder="github.com/XYZ"/>
+                  <Inp label="Website / Portfolio" value={resume.personal.website} onChange={v=>upP("website",v)} placeholder="XYZ.dev"/>
                 </div>
                 <Txt label="Professional Summary" value={resume.summary} onChange={v=>upR({summary:v})} rows={4} placeholder="A results-driven professional with..."/>
               </>}
