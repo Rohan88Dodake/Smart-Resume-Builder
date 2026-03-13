@@ -1,7 +1,7 @@
 // groqService.js
 // Place this file in: src/services/groqService.js
 
-const GROQ_API_KEY = process.env.REACT_APP_GROQ_API_KEY || "git reset HEAD~1";
+const GROQ_API_KEY = process.env.REACT_APP_GROQ_API_KEY || "";
 const MODEL = "llama-3.3-70b-versatile";
 
 async function groqChat(messages) {
