@@ -551,7 +551,7 @@ function AuthScreen({ onLogin }) {
           {mode==="signup"&&(
             <div style={{marginBottom:16}}>
               <label style={lblStyle}>Full Name</label>
-              <input type="text" value={form.name} placeholder="Rohan Dodake"
+              <input type="text" value={form.name} placeholder="xyz"
                 onChange={e=>setForm(f=>({...f,name:e.target.value}))}
                 onKeyDown={e=>e.key==="Enter"&&submit()}
                 style={inpStyle("name")}/>
