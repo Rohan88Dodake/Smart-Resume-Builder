@@ -897,6 +897,7 @@ export default function App() {
                   <Card key={edu.id} title="Education" i={i} onDel={()=>delItem("education",edu.id)} accent={EDU_ACCENT}>
                     <Inp label="Degree / Program" value={edu.degree} onChange={v=>setItem("education",edu.id,"degree",v)} placeholder="B.Tech Computer Engineering"/>
                     <Inp label="School / University" value={edu.school} onChange={v=>setItem("education",edu.id,"school",v)} placeholder="University of Pune"/>
+                    <Inp label="Degree specialization" value={edu.specialization} onChange={v=>setItem("education",edu.id,"specialization",v)} placeholder="specialization"/>
                     <Inp half label="Year Range" value={edu.year} onChange={v=>setItem("education",edu.id,"year",v)} placeholder="2020 – 2024"/>
                     <Inp half label="GPA / Grade" value={edu.gpa} onChange={v=>setItem("education",edu.id,"gpa",v)} placeholder="8.5/10"/>
                   </Card>
