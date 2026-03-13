@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import AIAssistant from "./components/AIAssistant";
 
 /* ═══════════════════════════════ FONTS ═══════════════════════════════ */
 const Fonts = () => (
@@ -14,7 +15,6 @@ const V = {
 
 /* ════════════════════════ 30 TEMPLATES ════════════════════════════════ */
 const T = {
-  // ── SIDEBAR LEFT (dark sidebar)
   midnight:  { name:"Midnight",      cat:"Corporate",  accent:"#3b82f6", sidebar:"#0f172a", sidebarTxt:"#e2e8f0", main:"#fff",     layout:"sl", font:"DM Sans" },
   crimson:   { name:"Crimson Elite", cat:"Executive",  accent:"#dc2626", sidebar:"#7f1d1d", sidebarTxt:"#fee2e2", main:"#fff",     layout:"sl", font:"Playfair Display" },
   emerald:   { name:"Emerald Grove", cat:"Modern",     accent:"#059669", sidebar:"#064e3b", sidebarTxt:"#d1fae5", main:"#f0fdf4",  layout:"sl", font:"DM Sans" },
@@ -25,15 +25,11 @@ const T = {
   coral:     { name:"Coral Pop",     cat:"Creative",   accent:"#f43f5e", sidebar:"#881337", sidebarTxt:"#fecdd3", main:"#fff",     layout:"sl", font:"DM Sans" },
   silicon:   { name:"Silicon Pro",   cat:"Tech",       accent:"#38bdf8", sidebar:"#0f172a", sidebarTxt:"#94a3b8", main:"#f8fafc",  layout:"sl", font:"Space Grotesk" },
   forest:    { name:"Forest Sage",   cat:"Natural",    accent:"#4ade80", sidebar:"#14532d", sidebarTxt:"#bbf7d0", main:"#f0fdf4",  layout:"sl", font:"DM Sans" },
-
-  // ── SIDEBAR RIGHT
   ocean:     { name:"Ocean Deep",    cat:"Modern",     accent:"#0e7490", sidebar:"#164e63", sidebarTxt:"#cffafe", main:"#fff",     layout:"sr", font:"DM Sans" },
   bamboo:    { name:"Bamboo Zen",    cat:"Natural",    accent:"#15803d", sidebar:"#166534", sidebarTxt:"#bbf7d0", main:"#f7fef7",  layout:"sr", font:"Lora" },
   indigo:    { name:"Indigo Night",  cat:"Modern",     accent:"#4f46e5", sidebar:"#1e1b4b", sidebarTxt:"#c7d2fe", main:"#eef2ff",  layout:"sr", font:"Space Grotesk" },
   sky:       { name:"Sky Blue",      cat:"Corporate",  accent:"#0284c7", sidebar:"#075985", sidebarTxt:"#bae6fd", main:"#f0f9ff",  layout:"sr", font:"DM Sans" },
   charcoal:  { name:"Charcoal",      cat:"Tech",       accent:"#10b981", sidebar:"#111827", sidebarTxt:"#d1d5db", main:"#1f2937",  layout:"sr", font:"Space Grotesk" },
-
-  // ── TOP HEADER (full-width header)
   pure:      { name:"Pure Minimal",  cat:"Minimal",    accent:"#111",    hdr:"#111",        hdrTxt:"#fff",        main:"#fff",     layout:"th", font:"DM Sans" },
   pastel:    { name:"Pastel Dream",  cat:"Creative",   accent:"#ec4899", hdr:"#fce7f3",     hdrTxt:"#831843",     main:"#fdf2f8",  layout:"th", font:"Lora" },
   vintage:   { name:"Vintage",       cat:"Classic",    accent:"#92400e", hdr:"#fef3c7",     hdrTxt:"#78350f",     main:"#fef9f0",  layout:"th", font:"Cormorant Garamond" },
@@ -44,8 +40,6 @@ const T = {
   mint:      { name:"Mint Fresh",    cat:"Natural",    accent:"#0d9488", hdr:"#0f766e",     hdrTxt:"#ccfbf1",     main:"#f0fdfa",  layout:"th", font:"DM Sans" },
   lavender:  { name:"Lavender",      cat:"Creative",   accent:"#7c3aed", hdr:"#6d28d9",     hdrTxt:"#ede9fe",     main:"#f5f3ff",  layout:"th", font:"Lora" },
   ruby:      { name:"Ruby Power",    cat:"Executive",  accent:"#be123c", hdr:"#9f1239",     hdrTxt:"#fce7f3",     main:"#fff1f2",  layout:"th", font:"Playfair Display" },
-
-  // ── BOLD / SPECIAL
   mono:      { name:"Monochrome",    cat:"Minimal",    accent:"#000",    hdr:"#000",        hdrTxt:"#fff",        main:"#fff",     layout:"line", font:"Syne" },
   arctic:    { name:"Arctic",        cat:"Corporate",  accent:"#2563eb", hdr:"#dbeafe",     hdrTxt:"#1e3a8a",     main:"#f8fafc",  layout:"line", font:"Space Grotesk" },
   sunset:    { name:"Sunset Warm",   cat:"Creative",   accent:"#ea580c", hdr:"#7c2d12",     hdrTxt:"#ffedd5",     main:"#fff",     layout:"bold", font:"Bebas Neue" },
@@ -305,7 +299,6 @@ function ResumePreview({ data, tKey }) {
   const mainSections = order.filter(id => !["skills","languages"].includes(id));
   const font = t.font || "DM Sans";
 
-  // Contact header row
   const ContactRow = ({col="#fff", size=11}) => (
     <div style={{display:"flex",flexWrap:"wrap",gap:4,alignItems:"center"}}>
       {p.email&&<CLink href={`mailto:${p.email}`} col={col}><span style={{display:"inline-flex",alignItems:"center",gap:4,fontSize:size,marginRight:10,opacity:0.9}}>{Icons.mail(11,col)}{p.email}</span></CLink>}
@@ -329,7 +322,6 @@ function ResumePreview({ data, tKey }) {
     </div>
   );
 
-  /* ── SIDEBAR LEFT ── */
   if (t.layout === "sl") {
     const isDark = ["neon","noir","charcoal"].includes(tKey);
     const mainBg = t.main;
@@ -353,7 +345,6 @@ function ResumePreview({ data, tKey }) {
     );
   }
 
-  /* ── SIDEBAR RIGHT ── */
   if (t.layout === "sr") {
     const isDark = ["charcoal"].includes(tKey);
     const mainBg = t.main;
@@ -378,7 +369,6 @@ function ResumePreview({ data, tKey }) {
     );
   }
 
-  /* ── TOP HEADER ── */
   if (t.layout === "th") {
     const hdrBg = t.hdr || t.accent;
     const hdrTxt = t.headerText || t.hdrTxt || "#fff";
@@ -402,7 +392,6 @@ function ResumePreview({ data, tKey }) {
     );
   }
 
-  /* ── TOP LINE ── */
   if (t.layout === "line") {
     const hdrBg = t.hdr || "#fff";
     const hdrTxt = t.hdrTxt || "#111";
@@ -428,7 +417,6 @@ function ResumePreview({ data, tKey }) {
     );
   }
 
-  /* ── BOLD ── */
   if (t.layout === "bold") {
     const hdrBg = t.hdr || t.dark || "#111";
     const hdrTxt = t.hdrTxt || "#fff";
@@ -549,7 +537,7 @@ function AuthScreen({ onLogin }) {
       <div style={{background:"#fff",borderRadius:22,width:"100%",maxWidth:420,boxShadow:"0 30px 80px rgba(0,0,0,0.35)",overflow:"hidden"}}>
         <div style={{background:"linear-gradient(135deg,#0f172a,#1e3a5f)",padding:"32px 36px 28px",textAlign:"center"}}>
           <div style={{fontSize:40,marginBottom:10}}>📄</div>
-          <h1 style={{margin:0,color:"#fff",fontSize:24,fontWeight:800,fontFamily:"'Playfair Display',serif"}}>ResumeForge</h1>
+          <h1 style={{margin:0,color:"#fff",fontSize:24,fontWeight:800,fontFamily:"'Playfair Display',serif"}}>Smart Resume Builder With AI</h1>
           <p style={{margin:"6px 0 0",color:"rgba(255,255,255,0.5)",fontSize:13}}>30 templates · All sections · Drag to reorder</p>
         </div>
         <div style={{padding:"28px 32px 32px"}}>
@@ -560,8 +548,6 @@ function AuthScreen({ onLogin }) {
               </button>
             ))}
           </div>
-
-          {/* Name field - signup only */}
           {mode==="signup"&&(
             <div style={{marginBottom:16}}>
               <label style={lblStyle}>Full Name</label>
@@ -572,8 +558,6 @@ function AuthScreen({ onLogin }) {
               {errors.name&&<p style={{color:"#ef4444",fontSize:12,margin:"4px 0 0"}}>⚠ {errors.name}</p>}
             </div>
           )}
-
-          {/* Email field */}
           <div style={{marginBottom:16}}>
             <label style={lblStyle}>Email Address</label>
             <input type="email" value={form.email} placeholder="you@example.com"
@@ -582,8 +566,6 @@ function AuthScreen({ onLogin }) {
               style={inpStyle("email")}/>
             {errors.email&&<p style={{color:"#ef4444",fontSize:12,margin:"4px 0 0"}}>⚠ {errors.email}</p>}
           </div>
-
-          {/* Password field */}
           <div style={{marginBottom:16}}>
             <label style={lblStyle}>Password</label>
             <div style={{position:"relative"}}>
@@ -599,7 +581,6 @@ function AuthScreen({ onLogin }) {
             </div>
             {errors.password&&<p style={{color:"#ef4444",fontSize:12,margin:"4px 0 0"}}>⚠ {errors.password}</p>}
           </div>
-
           <button onClick={submit} disabled={loading} style={{width:"100%",padding:13,background:loading?"#94a3b8":"linear-gradient(135deg,#2563eb,#7c3aed)",color:"#fff",border:"none",borderRadius:11,fontSize:15,fontWeight:700,cursor:loading?"not-allowed":"pointer",fontFamily:"'DM Sans',sans-serif",marginTop:4}}>
             {loading?"⏳ Please wait...":mode==="login"?"Sign In →":"Create Account →"}
           </button>
@@ -624,19 +605,8 @@ function SectionReorder({ sectionOrder, hiddenSections, onChange, onToggle }) {
     onChange(arr);
     setDragIdx(null); setOverIdx(null);
   };
-
-  const moveUp = (i) => {
-    if (i === 0) return;
-    const arr = [...sectionOrder];
-    [arr[i-1], arr[i]] = [arr[i], arr[i-1]];
-    onChange(arr);
-  };
-  const moveDown = (i) => {
-    if (i === sectionOrder.length-1) return;
-    const arr = [...sectionOrder];
-    [arr[i], arr[i+1]] = [arr[i+1], arr[i]];
-    onChange(arr);
-  };
+  const moveUp = (i) => { if (i === 0) return; const arr = [...sectionOrder]; [arr[i-1], arr[i]] = [arr[i], arr[i-1]]; onChange(arr); };
+  const moveDown = (i) => { if (i === sectionOrder.length-1) return; const arr = [...sectionOrder]; [arr[i], arr[i+1]] = [arr[i+1], arr[i]]; onChange(arr); };
 
   return (
     <div>
@@ -711,6 +681,7 @@ export default function App() {
   const [catFilter,setCatFilter]=useState("All");
   const [skillInput,setSkillInput]=useState("");
   const [downloading,setDownloading]=useState(false);
+  const [showAI,setShowAI]=useState(false);
   const previewRef=useRef(null);
 
   useEffect(()=>{
@@ -743,27 +714,20 @@ export default function App() {
 
   const upR = patch => setResume(r=>({...r,...patch}));
   const upP = (k,v) => setResume(r=>({...r,personal:{...r.personal,[k]:v}}));
-
-  // Generic section updaters
   const addItem = (sec,blank) => setResume(r=>({...r,[sec]:[...r[sec],blank()]}));
   const delItem = (sec,id) => setResume(r=>({...r,[sec]:r[sec].filter(x=>x.id!==id)}));
   const setItem = (sec,id,k,v) => setResume(r=>({...r,[sec]:r[sec].map(x=>x.id===id?{...x,[k]:v}:x)}));
-
-  // Experience bullet points
   const setPoint=(id,i,v)=>setResume(r=>({...r,experience:r.experience.map(e=>e.id===id?{...e,points:e.points.map((p,pi)=>pi===i?v:p)}:e)}));
   const addPoint=id=>setResume(r=>({...r,experience:r.experience.map(e=>e.id===id?{...e,points:[...e.points,""]}:e)}));
   const delPoint=(id,i)=>setResume(r=>({...r,experience:r.experience.map(e=>e.id===id?{...e,points:e.points.filter((_,pi)=>pi!==i)}:e)}));
-
   const addSkill=()=>{if(!skillInput.trim())return;setResume(r=>({...r,skills:[...r.skills,skillInput.trim()]}));setSkillInput("");};
   const delSkill=i=>setResume(r=>({...r,skills:r.skills.filter((_,si)=>si!==i)}));
-
   const toggleSection = id => {
     setResume(r=>{
       const hidden=r.hiddenSections||[];
       return {...r,hiddenSections:hidden.includes(id)?hidden.filter(x=>x!==id):[...hidden,id]};
     });
   };
-
   const logout=()=>{localStorage.removeItem("rf_session");setUser(null);setResume(null);};
 
   if(!user||!resume) return <AuthScreen onLogin={handleLogin}/>;
@@ -786,7 +750,6 @@ export default function App() {
   ];
 
   const EXP_ACCENT="#3b82f6", EDU_ACCENT="#059669", PROJ_ACCENT="#7c3aed", CERT_ACCENT="#dc2626", EC_ACCENT="#0e7490", LANG_ACCENT="#15803d", AWD_ACCENT="#b45309", VOL_ACCENT="#be123c";
-
 
   const downloadPDF = async () => {
     setDownloading(true);
@@ -819,6 +782,18 @@ export default function App() {
     setDownloading(false);
   };
 
+  // Build resume text for AI context
+  const resumeTextForAI = [
+    resume.personal.name && `Name: ${resume.personal.name}`,
+    resume.personal.title && `Title: ${resume.personal.title}`,
+    resume.summary && `Summary: ${resume.summary}`,
+    ...resume.experience.map(e=>`Experience: ${e.role} at ${e.company} (${e.start}–${e.current?"Present":e.end}). ${e.points.filter(Boolean).join(". ")}`),
+    ...resume.education.map(e=>`Education: ${e.degree} from ${e.school} (${e.year})`),
+    ...resume.projects.map(p=>`Project: ${p.name} [${p.tech}] - ${p.desc}`),
+    resume.skills.length && `Skills: ${resume.skills.join(", ")}`,
+    ...resume.certifications.map(c=>`Certification: ${c.name} by ${c.issuer} (${c.year})`),
+  ].filter(Boolean).join("\n");
+
   return (
     <div style={{height:"100vh",display:"flex",flexDirection:"column",background:"#f1f5f9",fontFamily:"'DM Sans',sans-serif",overflow:"hidden"}}>
       <Fonts/>
@@ -837,22 +812,23 @@ export default function App() {
         <button onClick={downloadPDF} disabled={downloading} style={{padding:"6px 14px",background:downloading?"#374151":"linear-gradient(135deg,#059669,#0d9488)",color:"#fff",border:"none",borderRadius:8,fontSize:12,cursor:downloading?"not-allowed":"pointer",fontWeight:700,display:"flex",alignItems:"center",gap:5,opacity:downloading?0.7:1}}>
           {downloading?"⏳ Preparing...":"⬇️ Download PDF"}
         </button>
+        {/* ── AI BUTTON ── */}
+        <button onClick={()=>setShowAI(s=>!s)} style={{padding:"6px 14px",background:showAI?"#7c3aed":"#4c1d95",color:"#ede9fe",border:`1.5px solid ${showAI?"#a78bfa":"#6d28d9"}`,borderRadius:8,fontSize:12,cursor:"pointer",fontWeight:700,transition:"all 0.2s"}}>
+          🤖 AI {showAI?"▲":"▼"}
+        </button>
         <button onClick={logout} style={{padding:"6px 12px",background:"#7f1d1d",color:"#fee2e2",border:"none",borderRadius:8,fontSize:12,cursor:"pointer",fontWeight:600}}>Logout</button>
       </div>
 
       {view==="preview" ? (
-        /* ── FULL PREVIEW ── */
         <div style={{flex:1,overflowY:"auto",padding:24,display:"flex",justifyContent:"center",background:"#e2e8f0"}}>
           <div ref={previewRef} style={{width:"210mm",background:"#fff",boxShadow:"0 10px 60px rgba(0,0,0,0.2)",borderRadius:4,overflow:"hidden"}}>
             <ResumePreview data={resume} tKey={resume.template}/>
           </div>
         </div>
       ) : (
-        /* ── SPLIT VIEW ── */
         <div style={{flex:1,display:"flex",overflow:"hidden"}}>
-          {/* LEFT PANEL */}
+          {/* LEFT EDITOR PANEL */}
           <div style={{width:340,flexShrink:0,display:"flex",flexDirection:"column",background:"#fff",borderRight:"1px solid #e2e8f0"}}>
-            {/* Tab bar */}
             <div style={{overflowX:"auto",borderBottom:"1px solid #f0f0f0",background:"#f8fafc",flexShrink:0}}>
               <div style={{display:"flex",padding:"0 6px",minWidth:"max-content"}}>
                 {TABS.map(t=>(
@@ -862,10 +838,7 @@ export default function App() {
                 ))}
               </div>
             </div>
-            {/* Tab content */}
             <div style={{flex:1,overflowY:"auto",padding:14}}>
-
-              {/* ── TEMPLATES ── */}
               {tab==="templates"&&<>
                 <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:12}}>
                   {CATS.map(c=>(
@@ -880,8 +853,6 @@ export default function App() {
                   ))}
                 </div>
               </>}
-
-              {/* ── PERSONAL ── */}
               {tab==="personal"&&<>
                 <div style={{display:"flex",flexWrap:"wrap",gap:"0 10px"}}>
                   <Inp half label="Full Name" value={resume.personal.name} onChange={v=>upP("name",v)} placeholder="Rohan Dodake"/>
@@ -895,8 +866,6 @@ export default function App() {
                 </div>
                 <Txt label="Professional Summary" value={resume.summary} onChange={v=>upR({summary:v})} rows={4} placeholder="A results-driven professional with..."/>
               </>}
-
-              {/* ── EXPERIENCE ── */}
               {tab==="experience"&&<>
                 {resume.experience.map((exp,i)=>(
                   <Card key={exp.id} title="Experience" i={i} onDel={()=>delItem("experience",exp.id)} accent={EXP_ACCENT}>
@@ -923,8 +892,6 @@ export default function App() {
                 ))}
                 <AddBtn onClick={()=>addItem("experience",blankExp)} label="Add Experience"/>
               </>}
-
-              {/* ── EDUCATION ── */}
               {tab==="education"&&<>
                 {resume.education.map((edu,i)=>(
                   <Card key={edu.id} title="Education" i={i} onDel={()=>delItem("education",edu.id)} accent={EDU_ACCENT}>
@@ -936,8 +903,6 @@ export default function App() {
                 ))}
                 <AddBtn onClick={()=>addItem("education",blankEdu)} label="Add Education"/>
               </>}
-
-              {/* ── PROJECTS ── */}
               {tab==="projects"&&<>
                 {resume.projects.map((pr,i)=>(
                   <Card key={pr.id} title="Project" i={i} onDel={()=>delItem("projects",pr.id)} accent={PROJ_ACCENT}>
@@ -950,8 +915,6 @@ export default function App() {
                 ))}
                 <AddBtn onClick={()=>addItem("projects",blankProj)} label="Add Project"/>
               </>}
-
-              {/* ── SKILLS ── */}
               {tab==="skills"&&<>
                 <div style={{display:"flex",gap:8,marginBottom:12}}>
                   <input value={skillInput} onChange={e=>setSkillInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&addSkill()} placeholder="Type skill + Enter..."
@@ -966,8 +929,6 @@ export default function App() {
                   ))}
                 </div>
               </>}
-
-              {/* ── CERTIFICATIONS ── */}
               {tab==="certifications"&&<>
                 {resume.certifications.map((c,i)=>(
                   <Card key={c.id} title="Certification" i={i} onDel={()=>delItem("certifications",c.id)} accent={CERT_ACCENT}>
@@ -979,8 +940,6 @@ export default function App() {
                 ))}
                 <AddBtn onClick={()=>addItem("certifications",blankCert)} label="Add Certification"/>
               </>}
-
-              {/* ── EXTRACURRICULAR ── */}
               {tab==="extracurricular"&&<>
                 {resume.extracurricular.map((e,i)=>(
                   <Card key={e.id} title="Activity" i={i} onDel={()=>delItem("extracurricular",e.id)} accent={EC_ACCENT}>
@@ -992,8 +951,6 @@ export default function App() {
                 ))}
                 <AddBtn onClick={()=>addItem("extracurricular",blankEC)} label="Add Activity"/>
               </>}
-
-              {/* ── LANGUAGES ── */}
               {tab==="languages"&&<>
                 {resume.languages.map((l,i)=>(
                   <Card key={l.id} title="Language" i={i} onDel={()=>delItem("languages",l.id)} accent={LANG_ACCENT}>
@@ -1003,8 +960,6 @@ export default function App() {
                 ))}
                 <AddBtn onClick={()=>addItem("languages",blankLang)} label="Add Language"/>
               </>}
-
-              {/* ── AWARDS ── */}
               {tab==="awards"&&<>
                 {resume.awards.map((a,i)=>(
                   <Card key={a.id} title="Award" i={i} onDel={()=>delItem("awards",a.id)} accent={AWD_ACCENT}>
@@ -1016,8 +971,6 @@ export default function App() {
                 ))}
                 <AddBtn onClick={()=>addItem("awards",blankAward)} label="Add Award"/>
               </>}
-
-              {/* ── VOLUNTEER ── */}
               {tab==="volunteer"&&<>
                 {resume.volunteer.map((v,i)=>(
                   <Card key={v.id} title="Volunteer" i={i} onDel={()=>delItem("volunteer",v.id)} accent={VOL_ACCENT}>
@@ -1029,8 +982,6 @@ export default function App() {
                 ))}
                 <AddBtn onClick={()=>addItem("volunteer",blankVol)} label="Add Volunteer Role"/>
               </>}
-
-              {/* ── SECTION ORDER ── */}
               {tab==="order"&&(
                 <SectionReorder
                   sectionOrder={resume.sectionOrder||[]}
@@ -1039,9 +990,15 @@ export default function App() {
                   onToggle={toggleSection}
                 />
               )}
-
             </div>
           </div>
+
+          {/* ── AI PANEL ── */}
+          {showAI && (
+            <div style={{width:520,flexShrink:0,overflowY:"auto",background:"#0f172a",borderLeft:"1px solid #1e293b",borderRight:"1px solid #1e293b",padding:16,display:"flex",flexDirection:"column"}}>
+              <AIAssistant resumeText={resumeTextForAI} />
+            </div>
+          )}
 
           {/* RIGHT PREVIEW */}
           <div style={{flex:1,overflowY:"auto",background:"#e2e8f0",padding:20,display:"flex",justifyContent:"center"}}>
