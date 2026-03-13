@@ -800,7 +800,7 @@ export default function App() {
       {/* ── TOPBAR ── */}
       <div style={{background:"#0f172a",height:52,display:"flex",alignItems:"center",padding:"0 16px",gap:10,flexShrink:0,zIndex:20}}>
         <span style={{fontSize:22}}>📄</span>
-        <span style={{color:"#fff",fontWeight:800,fontSize:15,fontFamily:"'Playfair Display',serif",marginRight:8}}>ResumeForge</span>
+        <span style={{color:"#fff",fontWeight:800,fontSize:15,fontFamily:"'Playfair Display',serif",marginRight:8}}>Smart Resume Builder with AI Assistant</span>
         <div style={{flex:1}}/>
         <span style={{color:"#64748b",fontSize:12}}>👋 {user.name}</span>
         <button onClick={saveResume} style={{padding:"6px 14px",background:saved?"#059669":"#2563eb",color:"#fff",border:"none",borderRadius:8,fontSize:12,cursor:"pointer",fontWeight:700,display:"flex",alignItems:"center",gap:5,transition:"background 0.3s"}}>
