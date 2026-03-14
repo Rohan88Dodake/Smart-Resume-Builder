@@ -773,43 +773,47 @@ export default function App() {
     await loadScript("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js");
     await loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
 
-    const source = previewRef.current;
-    if (!source) { alert("Switch to Full Preview first."); setDownloading(false); return; }
+    // Switch to full preview
+    const wasInSplit = view === "split";
+    if (wasInSplit) {
+      setView("preview");
+      await new Promise(r => setTimeout(r, 800));
+    }
 
-    // Clone and fix all overflow issues
-    const clone = source.cloneNode(true);
-    clone.style.cssText = `
-      position: fixed; top: -99999px; left: 0;
-      width: 794px; height: auto !important;
-      overflow: visible !important;
-      z-index: -1; background: white;
-    `;
+    const el = previewRef.current;
+    if (!el) { alert("Preview not found."); setDownloading(false); return; }
 
-    // Fix overflow on ALL inner elements
-    const allEls = clone.querySelectorAll("*");
-    allEls.forEach(el => {
-      el.style.overflow = "visible";
-      el.style.maxHeight = "none";
-      el.style.height = "auto";
-    });
+    // Temporarily remove overflow restrictions
+    const parent = el.parentElement;
+    const oldParentOverflow = parent.style.overflow;
+    const oldParentHeight = parent.style.height;
+    const oldElOverflow = el.style.overflow;
 
-    document.body.appendChild(clone);
-    await new Promise(r => setTimeout(r, 500));
+    parent.style.overflow = "visible";
+    parent.style.height = "auto";
+    el.style.overflow = "visible";
 
-    const totalHeight = clone.scrollHeight;
+    await new Promise(r => setTimeout(r, 300));
 
-    const canvas = await window.html2canvas(clone, {
-      scale: 3,
+    const totalH = el.scrollHeight;
+    const totalW = el.scrollWidth;
+
+    const canvas = await window.html2canvas(el, {
+      scale: 2,
       useCORS: true,
       logging: false,
       backgroundColor: "#ffffff",
-      width: 794,
-      height: totalHeight,
-      windowWidth: 794,
-      windowHeight: totalHeight,
+      width: totalW,
+      height: totalH,
+      scrollX: 0,
+      scrollY: 0,
     });
 
-    document.body.removeChild(clone);
+    // Restore styles
+    parent.style.overflow = oldParentOverflow;
+    parent.style.height = oldParentHeight;
+    el.style.overflow = oldElOverflow;
+    if (wasInSplit) setView("split");
 
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
@@ -817,6 +821,7 @@ export default function App() {
     const pdfH = pdf.internal.pageSize.getHeight();
     const imgData = canvas.toDataURL("image/jpeg", 1.0);
     const imgH = (canvas.height * pdfW) / canvas.width;
+
     let y = 0;
     while (y < imgH) {
       pdf.addImage(imgData, "JPEG", 0, -y, pdfW, imgH);
@@ -824,6 +829,7 @@ export default function App() {
       y += pdfH;
     }
     pdf.save(`${(resume.personal.name || "Resume").replace(/\s+/g,"_")}_Resume.pdf`);
+
   } catch(e) { alert("Download failed: " + e.message); }
   setDownloading(false);
 };
