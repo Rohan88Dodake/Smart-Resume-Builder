@@ -763,25 +763,24 @@ export default function App() {
 
   const EXP_ACCENT="#3b82f6", EDU_ACCENT="#059669", PROJ_ACCENT="#7c3aed", CERT_ACCENT="#dc2626", EC_ACCENT="#0e7490", LANG_ACCENT="#15803d", AWD_ACCENT="#b45309", VOL_ACCENT="#be123c";
 
- const downloadPDF = () => {
+ 
+    const downloadPDF = () => {
   const element = document.getElementById("resume-print-area");
-
-  if (!element) {
-    alert("Resume not found");
-    return;
-  }
 
   const opt = {
     margin: 0,
     filename: `${resume.personal.name || "resume"}.pdf`,
     image: { type: "jpeg", quality: 1 },
-    html2canvas: { scale: 2 },
+    html2canvas: { scale: 2, useCORS: true },
     jsPDF: {
       unit: "mm",
       format: "a4",
       orientation: "portrait"
     }
   };
+
+  html2pdf().set(opt).from(element).save();
+};
 
   html2pdf().set(opt).from(element).save();
 };
@@ -1058,14 +1057,14 @@ export default function App() {
       </div>
 
       {/* PRINT AREA */}
-      <div
-        id="resume-print-area"
-        style={{
-          width: "210mm",
-          minHeight: "297mm",
-          background: "#fff"
-        }}
-      >
+   <div
+  id="resume-print-area"
+  style={{
+    width:"210mm",
+    background:"#fff",
+    padding:"20mm"
+  }}
+>
         <ResumePreview
           data={resume}
           tKey={resume.template}
