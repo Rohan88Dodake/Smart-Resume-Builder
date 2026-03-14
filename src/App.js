@@ -821,7 +821,7 @@ export default function App() {
 
       {view==="preview" ? (
         <div style={{flex:1,overflowY:"auto",padding:24,display:"flex",justifyContent:"center",background:"#e2e8f0"}}>
-          <div ref={previewRef} style={{width:"210mm",background:"#fff",boxShadow:"0 10px 60px rgba(0,0,0,0.2)",borderRadius:4,overflow:"hidden"}}>
+          <div ref={previewRef} style={{width:"210mm",background:"#fff",boxShadow:"0 10px 60px rgba(0,0,0,0.2)",borderRadius:4,overflow:"auto"}}>
             <ResumePreview data={resume} tKey={resume.template}/>
           </div>
         </div>
