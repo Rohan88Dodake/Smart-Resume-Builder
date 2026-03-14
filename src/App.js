@@ -442,9 +442,8 @@ function ResumePreview({ data, tKey }) {
         </div>
         <div style={{padding:"20px 30px 28px"}}>
           {data.summary&&<><SecHead title="About" accent={t.accent}/><p style={{margin:"0 0 4px",fontSize:12,color:"#374151",lineHeight:1.75,borderLeft:`3px solid ${t.accent}`,paddingLeft:12}}>{data.summary}</p></>}
-          <div style={{display:"grid",gridTemplateColumns:"1fr 175px",gap:"0 24px"}}>
-            <div>{mainSections.filter(s=>!["skills","languages"].includes(s)).map(id=>renderSection(id,data,t,"#1e293b",t.accent))}</div>
-            <div>{renderSidebarSkills(data,t.accent,"#1e293b")}</div>
+          <div>
+            {order.map(id=>renderSection(id,data,t,"#1e293b",t.accent))}
           </div>
         </div>
       </div>
@@ -764,35 +763,53 @@ export default function App() {
   const EXP_ACCENT="#3b82f6", EDU_ACCENT="#059669", PROJ_ACCENT="#7c3aed", CERT_ACCENT="#dc2626", EC_ACCENT="#0e7490", LANG_ACCENT="#15803d", AWD_ACCENT="#b45309", VOL_ACCENT="#be123c";
 
   const downloadPDF = async () => {
-    setDownloading(true);
-    const loadScript = (src) => new Promise((res, rej) => {
-      if (document.querySelector(`script[src="${src}"]`)) { res(); return; }
-      const s = document.createElement("script"); s.src = src;
-      s.onload = res; s.onerror = rej; document.head.appendChild(s);
+  setDownloading(true);
+  const loadScript = (src) => new Promise((res, rej) => {
+    if (document.querySelector(`script[src="${src}"]`)) { res(); return; }
+    const s = document.createElement("script"); s.src = src;
+    s.onload = res; s.onerror = rej; document.head.appendChild(s);
+  });
+  try {
+    await loadScript("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js");
+    await loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
+
+    // Switch to preview mode temporarily if in split view
+    const wasInSplit = view === "split";
+    if (wasInSplit) setView("preview");
+    await new Promise(r => setTimeout(r, 600));
+
+    const el = previewRef.current;
+    if (!el) { alert("Preview not found."); setDownloading(false); return; }
+
+    const canvas = await window.html2canvas(el, {
+      scale: 3,
+      useCORS: true,
+      logging: false,
+      backgroundColor: "#ffffff",
+      width: el.scrollWidth,
+      height: el.scrollHeight,
+      windowWidth: el.scrollWidth,
+      windowHeight: el.scrollHeight,
     });
-    try {
-      await loadScript("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js");
-      await loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
-      const el = previewRef.current;
-      if (!el) { alert("Switch to Full Preview first, then download."); setDownloading(false); return; }
-      const canvas = await window.html2canvas(el, { scale: 2, useCORS: true, logging: false, backgroundColor: "#ffffff" });
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
-      const pdfW = pdf.internal.pageSize.getWidth();
-      const pdfH = pdf.internal.pageSize.getHeight();
-      const imgData = canvas.toDataURL("image/jpeg", 0.98);
-      const imgH = (canvas.height * pdfW) / canvas.width;
-      let y = 0;
-      while (y < imgH) {
-        pdf.addImage(imgData, "JPEG", 0, -y, pdfW, imgH);
-        if (y + pdfH < imgH) pdf.addPage();
-        y += pdfH;
-      }
-      const name = resume.personal.name || "Resume";
-      pdf.save(`${name.replace(/\s+/g,"_")}_Resume.pdf`);
-    } catch(e) { alert("Download failed: " + e.message); }
-    setDownloading(false);
-  };
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
+    const pdfW = pdf.internal.pageSize.getWidth();
+    const pdfH = pdf.internal.pageSize.getHeight();
+    const imgData = canvas.toDataURL("image/jpeg", 1.0);
+    const imgH = (canvas.height * pdfW) / canvas.width;
+    let y = 0;
+    while (y < imgH) {
+      pdf.addImage(imgData, "JPEG", 0, -y, pdfW, imgH);
+      if (y + pdfH < imgH) pdf.addPage();
+      y += pdfH;
+    }
+    pdf.save(`${(resume.personal.name || "Resume").replace(/\s+/g,"_")}_Resume.pdf`);
+
+    if (wasInSplit) setView("split");
+  } catch(e) { alert("Download failed: " + e.message); }
+  setDownloading(false);
+};
 
   // Build resume text for AI context
   const resumeTextForAI = [
@@ -833,7 +850,7 @@ export default function App() {
 
       {view==="preview" ? (
         <div style={{flex:1,overflowY:"auto",padding:24,display:"flex",justifyContent:"center",background:"#e2e8f0"}}>
-          <div ref={previewRef} style={{width:"210mm",background:"#fff",boxShadow:"0 10px 60px rgba(0,0,0,0.2)",borderRadius:4,overflow:"auto"}}>
+          <div ref={previewRef} style={{width:"210mm",background:"#fff",boxShadow:"0 10px 60px rgba(0,0,0,0.2)",borderRadius:4}}>
             <ResumePreview data={resume} tKey={resume.template}/>
           </div>
         </div>
