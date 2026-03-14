@@ -762,7 +762,7 @@ export default function App() {
 
   const EXP_ACCENT="#3b82f6", EDU_ACCENT="#059669", PROJ_ACCENT="#7c3aed", CERT_ACCENT="#dc2626", EC_ACCENT="#0e7490", LANG_ACCENT="#15803d", AWD_ACCENT="#b45309", VOL_ACCENT="#be123c";
 
-  const downloadPDF = async () => {
+ const downloadPDF = async () => {
   setDownloading(true);
   const loadScript = (src) => new Promise((res, rej) => {
     if (document.querySelector(`script[src="${src}"]`)) { res(); return; }
@@ -773,29 +773,40 @@ export default function App() {
     await loadScript("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js");
     await loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
 
-    // Create a hidden full-size clone for capture
     const source = previewRef.current;
     if (!source) { alert("Switch to Full Preview first."); setDownloading(false); return; }
 
+    // Clone and fix all overflow issues
     const clone = source.cloneNode(true);
-    clone.style.position = "fixed";
-    clone.style.top = "-99999px";
-    clone.style.left = "0";
-    clone.style.width = "794px";
-    clone.style.height = "auto";
-    clone.style.overflow = "visible";
-    clone.style.zIndex = "-1";
-    document.body.appendChild(clone);
+    clone.style.cssText = `
+      position: fixed; top: -99999px; left: 0;
+      width: 794px; height: auto !important;
+      overflow: visible !important;
+      z-index: -1; background: white;
+    `;
 
-    await new Promise(r => setTimeout(r, 400));
+    // Fix overflow on ALL inner elements
+    const allEls = clone.querySelectorAll("*");
+    allEls.forEach(el => {
+      el.style.overflow = "visible";
+      el.style.maxHeight = "none";
+      el.style.height = "auto";
+    });
+
+    document.body.appendChild(clone);
+    await new Promise(r => setTimeout(r, 500));
+
+    const totalHeight = clone.scrollHeight;
 
     const canvas = await window.html2canvas(clone, {
       scale: 3,
       useCORS: true,
       logging: false,
       backgroundColor: "#ffffff",
-      width: clone.scrollWidth,
-      height: clone.scrollHeight,
+      width: 794,
+      height: totalHeight,
+      windowWidth: 794,
+      windowHeight: totalHeight,
     });
 
     document.body.removeChild(clone);
