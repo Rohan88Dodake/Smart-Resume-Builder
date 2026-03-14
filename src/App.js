@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import AIAssistant from "./components/AIAssistant";
+import html2pdf from "html2pdf.js";
 
 /* ═══════════════════════════════ FONTS ═══════════════════════════════ */
 const Fonts = () => (
@@ -763,33 +764,26 @@ export default function App() {
   const EXP_ACCENT="#3b82f6", EDU_ACCENT="#059669", PROJ_ACCENT="#7c3aed", CERT_ACCENT="#dc2626", EC_ACCENT="#0e7490", LANG_ACCENT="#15803d", AWD_ACCENT="#b45309", VOL_ACCENT="#be123c";
 
  const downloadPDF = () => {
-  const resumeHTML = document.getElementById("resume-print-area")?.innerHTML;
-  if (!resumeHTML) { alert("No resume content found."); return; }
+  const element = document.getElementById("resume-print-area");
 
-  const printWindow = window.open("", "_blank");
-  printWindow.document.write(`
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="utf-8"/>
-      <title>${resume.personal.name || "Resume"}</title>
-      <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;600;700;900&family=Syne:wght@400;600;700;800&family=Lora:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=Bebas+Neue&family=Cormorant+Garamond:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-      <style>
-        * { margin:0; padding:0; box-sizing:border-box; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-        body { width:210mm; }
-        @page { size: A4; margin: 0; }
-        @media print { body { width:210mm; } }
-      </style>
-    </head>
-    <body>${resumeHTML}</body>
-    </html>
-  `);
-  printWindow.document.close();
-  setTimeout(() => {
-    printWindow.focus();
-    printWindow.print();
-    printWindow.close();
-  }, 800);
+  if (!element) {
+    alert("Resume not found");
+    return;
+  }
+
+  const opt = {
+    margin: 0,
+    filename: `${resume.personal.name || "resume"}.pdf`,
+    image: { type: "jpeg", quality: 1 },
+    html2canvas: { scale: 2 },
+    jsPDF: {
+      unit: "mm",
+      format: "a4",
+      orientation: "portrait"
+    }
+  };
+
+  html2pdf().set(opt).from(element).save();
 };
   // Build resume text for AI context
   const resumeTextForAI = [
@@ -1009,19 +1003,80 @@ export default function App() {
           )}
 
           {/* RIGHT PREVIEW */}
-          <div style={{flex:1,overflowY:"auto",background:"#e2e8f0",padding:20,display:"flex",justifyContent:"center"}}>
-            <div style={{width:"100%",maxWidth:760}}>
-              <div style={{background:"#fff",borderRadius:8,boxShadow:"0 8px 40px rgba(0,0,0,0.15)"}}>
-  <div style={{background:"#f8fafc",padding:"8px 16px",borderBottom:"1px solid #e2e8f0",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-    <span style={{fontSize:11,fontWeight:700,color:"#94a3b8",textTransform:"uppercase",letterSpacing:1}}>Live Preview · {T[resume.template]?.name||"Template"}</span>
-    <div style={{width:10,height:10,borderRadius:"50%",background:T[resume.template]?.accent||"#3b82f6"}}/>
+{/* RIGHT PREVIEW */}
+<div
+  style={{
+    flex: 1,
+    overflowY: "auto",
+    background: "#e2e8f0",
+    padding: 20,
+    display: "flex",
+    justifyContent: "center"
+  }}
+>
+
+  <div style={{ width: "210mm" }}>
+
+    <div
+      style={{
+        background: "#fff",
+        boxShadow: "0 8px 40px rgba(0,0,0,0.15)"
+      }}
+    >
+
+      {/* Preview Header */}
+      <div
+        style={{
+          background: "#f8fafc",
+          padding: "8px 16px",
+          borderBottom: "1px solid #e2e8f0",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center"
+        }}
+      >
+        <span
+          style={{
+            fontSize: 11,
+            fontWeight: 700,
+            color: "#94a3b8",
+            textTransform: "uppercase",
+            letterSpacing: 1
+          }}
+        >
+          Live Preview · {T[resume.template]?.name || "Template"}
+        </span>
+
+        <div
+          style={{
+            width: 10,
+            height: 10,
+            borderRadius: "50%",
+            background: T[resume.template]?.accent || "#3b82f6"
+          }}
+        />
+      </div>
+
+      {/* PRINT AREA */}
+      <div
+        id="resume-print-area"
+        style={{
+          width: "210mm",
+          minHeight: "297mm",
+          background: "#fff"
+        }}
+      >
+        <ResumePreview
+          data={resume}
+          tKey={resume.template}
+        />
+      </div>
+
+    </div>
+
   </div>
-  <div id="resume-print-area">
-    <ResumePreview data={resume} tKey={resume.template}/>
-  </div>
+
 </div>
-            </div>
-          </div>
         </div>
       )}
     </div>
