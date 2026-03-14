@@ -762,78 +762,35 @@ export default function App() {
 
   const EXP_ACCENT="#3b82f6", EDU_ACCENT="#059669", PROJ_ACCENT="#7c3aed", CERT_ACCENT="#dc2626", EC_ACCENT="#0e7490", LANG_ACCENT="#15803d", AWD_ACCENT="#b45309", VOL_ACCENT="#be123c";
 
- const downloadPDF = async () => {
-  setDownloading(true);
-  const loadScript = (src) => new Promise((res, rej) => {
-    if (document.querySelector(`script[src="${src}"]`)) { res(); return; }
-    const s = document.createElement("script"); s.src = src;
-    s.onload = res; s.onerror = rej; document.head.appendChild(s);
-  });
-  try {
-    await loadScript("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js");
-    await loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
+ const downloadPDF = () => {
+  const resumeHTML = document.getElementById("resume-print-area")?.innerHTML;
+  if (!resumeHTML) { alert("No resume content found."); return; }
 
-    // Switch to full preview
-    const wasInSplit = view === "split";
-    if (wasInSplit) {
-      setView("preview");
-      await new Promise(r => setTimeout(r, 800));
-    }
-
-    const el = previewRef.current;
-    if (!el) { alert("Preview not found."); setDownloading(false); return; }
-
-    // Temporarily remove overflow restrictions
-    const parent = el.parentElement;
-    const oldParentOverflow = parent.style.overflow;
-    const oldParentHeight = parent.style.height;
-    const oldElOverflow = el.style.overflow;
-
-    parent.style.overflow = "visible";
-    parent.style.height = "auto";
-    el.style.overflow = "visible";
-
-    await new Promise(r => setTimeout(r, 300));
-
-    const totalH = el.scrollHeight;
-    const totalW = el.scrollWidth;
-
-    const canvas = await window.html2canvas(el, {
-      scale: 2,
-      useCORS: true,
-      logging: false,
-      backgroundColor: "#ffffff",
-      width: totalW,
-      height: totalH,
-      scrollX: 0,
-      scrollY: 0,
-    });
-
-    // Restore styles
-    parent.style.overflow = oldParentOverflow;
-    parent.style.height = oldParentHeight;
-    el.style.overflow = oldElOverflow;
-    if (wasInSplit) setView("split");
-
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
-    const pdfW = pdf.internal.pageSize.getWidth();
-    const pdfH = pdf.internal.pageSize.getHeight();
-    const imgData = canvas.toDataURL("image/jpeg", 1.0);
-    const imgH = (canvas.height * pdfW) / canvas.width;
-
-    let y = 0;
-    while (y < imgH) {
-      pdf.addImage(imgData, "JPEG", 0, -y, pdfW, imgH);
-      if (y + pdfH < imgH) pdf.addPage();
-      y += pdfH;
-    }
-    pdf.save(`${(resume.personal.name || "Resume").replace(/\s+/g,"_")}_Resume.pdf`);
-
-  } catch(e) { alert("Download failed: " + e.message); }
-  setDownloading(false);
+  const printWindow = window.open("", "_blank");
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8"/>
+      <title>${resume.personal.name || "Resume"}</title>
+      <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;600;700;900&family=Syne:wght@400;600;700;800&family=Lora:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=Bebas+Neue&family=Cormorant+Garamond:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+      <style>
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+        body { width:210mm; }
+        @page { size: A4; margin: 0; }
+        @media print { body { width:210mm; } }
+      </style>
+    </head>
+    <body>${resumeHTML}</body>
+    </html>
+  `);
+  printWindow.document.close();
+  setTimeout(() => {
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+  }, 800);
 };
-
   // Build resume text for AI context
   const resumeTextForAI = [
     resume.personal.name && `Name: ${resume.personal.name}`,
@@ -870,15 +827,14 @@ export default function App() {
         </button>
         <button onClick={logout} style={{padding:"6px 12px",background:"#7f1d1d",color:"#fee2e2",border:"none",borderRadius:8,fontSize:12,cursor:"pointer",fontWeight:600}}>Logout</button>
       </div>
-
-      {view==="preview" ? (
-        <div style={{flex:1,overflowY:"auto",padding:24,display:"flex",justifyContent:"center",background:"#e2e8f0"}}>
-          <div ref={previewRef} style={{width:"210mm",background:"#fff",boxShadow:"0 10px 60px rgba(0,0,0,0.2)",borderRadius:4}}>
-            <ResumePreview data={resume} tKey={resume.template}/>
-          </div>
-        </div>
-      ) : (
-        <div style={{flex:1,display:"flex",overflow:"hidden"}}>
+    {view==="preview" ? (
+  <div style={{flex:1,overflowY:"auto",padding:24,display:"flex",justifyContent:"center",background:"#e2e8f0"}}>
+    <div ref={previewRef} id="resume-print-area" style={{width:"210mm",background:"#fff",boxShadow:"0 10px 60px rgba(0,0,0,0.2)",borderRadius:4}}>
+      <ResumePreview data={resume} tKey={resume.template}/>
+    </div>
+  </div>
+) : (
+  <div style={{flex:1,display:"flex",overflow:"hidden"}}>
           {/* LEFT EDITOR PANEL */}
           <div style={{width:340,flexShrink:0,display:"flex",flexDirection:"column",background:"#fff",borderRight:"1px solid #e2e8f0"}}>
             <div style={{overflowX:"auto",borderBottom:"1px solid #f0f0f0",background:"#f8fafc",flexShrink:0}}>
@@ -1055,13 +1011,15 @@ export default function App() {
           {/* RIGHT PREVIEW */}
           <div style={{flex:1,overflowY:"auto",background:"#e2e8f0",padding:20,display:"flex",justifyContent:"center"}}>
             <div style={{width:"100%",maxWidth:760}}>
-              <div style={{background:"#fff",borderRadius:8,boxShadow:"0 8px 40px rgba(0,0,0,0.15)",overflow:"hidden"}}>
-                <div style={{background:"#f8fafc",padding:"8px 16px",borderBottom:"1px solid #e2e8f0",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                  <span style={{fontSize:11,fontWeight:700,color:"#94a3b8",textTransform:"uppercase",letterSpacing:1}}>Live Preview · {T[resume.template]?.name||"Template"}</span>
-                  <div style={{width:10,height:10,borderRadius:"50%",background:T[resume.template]?.accent||"#3b82f6"}}/>
-                </div>
-                <ResumePreview data={resume} tKey={resume.template}/>
-              </div>
+              <div style={{background:"#fff",borderRadius:8,boxShadow:"0 8px 40px rgba(0,0,0,0.15)"}}>
+  <div style={{background:"#f8fafc",padding:"8px 16px",borderBottom:"1px solid #e2e8f0",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+    <span style={{fontSize:11,fontWeight:700,color:"#94a3b8",textTransform:"uppercase",letterSpacing:1}}>Live Preview · {T[resume.template]?.name||"Template"}</span>
+    <div style={{width:10,height:10,borderRadius:"50%",background:T[resume.template]?.accent||"#3b82f6"}}/>
+  </div>
+  <div id="resume-print-area">
+    <ResumePreview data={resume} tKey={resume.template}/>
+  </div>
+</div>
             </div>
           </div>
         </div>
