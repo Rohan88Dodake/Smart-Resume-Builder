@@ -773,24 +773,32 @@ export default function App() {
     await loadScript("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js");
     await loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
 
-    // Switch to preview mode temporarily if in split view
-    const wasInSplit = view === "split";
-    if (wasInSplit) setView("preview");
-    await new Promise(r => setTimeout(r, 600));
+    // Create a hidden full-size clone for capture
+    const source = previewRef.current;
+    if (!source) { alert("Switch to Full Preview first."); setDownloading(false); return; }
 
-    const el = previewRef.current;
-    if (!el) { alert("Preview not found."); setDownloading(false); return; }
+    const clone = source.cloneNode(true);
+    clone.style.position = "fixed";
+    clone.style.top = "-99999px";
+    clone.style.left = "0";
+    clone.style.width = "794px";
+    clone.style.height = "auto";
+    clone.style.overflow = "visible";
+    clone.style.zIndex = "-1";
+    document.body.appendChild(clone);
 
-    const canvas = await window.html2canvas(el, {
+    await new Promise(r => setTimeout(r, 400));
+
+    const canvas = await window.html2canvas(clone, {
       scale: 3,
       useCORS: true,
       logging: false,
       backgroundColor: "#ffffff",
-      width: el.scrollWidth,
-      height: el.scrollHeight,
-      windowWidth: el.scrollWidth,
-      windowHeight: el.scrollHeight,
+      width: clone.scrollWidth,
+      height: clone.scrollHeight,
     });
+
+    document.body.removeChild(clone);
 
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
@@ -805,8 +813,6 @@ export default function App() {
       y += pdfH;
     }
     pdf.save(`${(resume.personal.name || "Resume").replace(/\s+/g,"_")}_Resume.pdf`);
-
-    if (wasInSplit) setView("split");
   } catch(e) { alert("Download failed: " + e.message); }
   setDownloading(false);
 };
