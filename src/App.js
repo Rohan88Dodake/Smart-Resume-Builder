@@ -357,11 +357,11 @@ function ResumePreview({ data, tKey }) {
           <h1 style={{margin:"0 0 3px",fontSize:15,fontWeight:800,color:t.sidebarTxt,lineHeight:1.2}}>{p.name||"Your Name"}</h1>
           <p style={{margin:"0 0 16px",fontSize:10,color:t.accent,fontWeight:700,textTransform:"uppercase",letterSpacing:0.8,lineHeight:1.3}}>{p.title}</p>
           <SideContact col={t.sidebarTxt}/>
-          {renderSidebarSkills(data, t.accent, t.sidebarTxt)}
+        
         </div>
         <div style={{flex:1,padding:"24px 22px",overflowY:"auto"}}>
           {data.summary&&<><SecHead title="Profile" accent={t.accent}/><p style={{margin:"0 0 4px",fontSize:12,color:isDark?"#94a3b8":"#374151",lineHeight:1.75}}>{data.summary}</p></>}
-          {mainSections.filter(s=>!["skills","languages"].includes(s)).map(id=>renderSection(id,data,t,mainTxt,t.accent))}
+          {order.map(id=>renderSection(id,data,t,mainTxt,t.accent))}  
         </div>
       </div>
     );
@@ -381,11 +381,9 @@ function ResumePreview({ data, tKey }) {
         <div style={{display:"flex"}}>
           <div style={{flex:1,padding:"18px 22px"}}>
             {data.summary&&<><SecHead title="Profile" accent={t.accent}/><p style={{margin:"0 0 4px",fontSize:12,color:"#374151",lineHeight:1.75}}>{data.summary}</p></>}
-            {mainSections.filter(s=>!["skills","languages"].includes(s)).map(id=>renderSection(id,data,t,mainTxt,t.accent))}
+            {order.map(id=>renderSection(id,data,t,mainTxt,t.accent))}
           </div>
-          <div style={{width:175,background:`${t.accent}08`,padding:"18px 14px",borderLeft:`2px solid ${t.accent}20`}}>
-            {renderSidebarSkills(data,t.accent,"#1e293b")}
-          </div>
+         
         </div>
       </div>
     );
@@ -401,14 +399,9 @@ function ResumePreview({ data, tKey }) {
           <p style={{margin:"4px 0 12px",fontSize:12,color:hdrTxt,opacity:0.75,fontWeight:600,textTransform:"uppercase",letterSpacing:1}}>{p.title}</p>
           <ContactRow col={hdrTxt}/>
         </div>
-        <div style={{display:"grid",gridTemplateColumns:"1fr 185px"}}>
-          <div style={{padding:"16px 24px 24px"}}>
-            {data.summary&&<><SecHead title="Summary" accent={t.accent}/><p style={{margin:"0 0 4px",fontSize:12,color:"#374151",lineHeight:1.75}}>{data.summary}</p></>}
-            {mainSections.filter(s=>!["skills","languages"].includes(s)).map(id=>renderSection(id,data,t,"#1e293b",t.accent))}
-          </div>
-          <div style={{padding:"16px 14px",borderLeft:`1.5px solid ${t.accent}18`,background:`${t.accent}04`}}>
-            {renderSidebarSkills(data,t.accent,"#1e293b")}
-          </div>
+        <div style={{padding:"16px 24px 24px"}}>
+          {data.summary&&<><SecHead title="Summary" accent={t.accent}/><p style={{margin:"0 0 4px",fontSize:12,color:"#374151",lineHeight:1.75}}>{data.summary}</p></>}
+          {order.map(id=>renderSection(id,data,t,"#1e293b",t.accent))}
         </div>
       </div>
     );
@@ -428,12 +421,9 @@ function ResumePreview({ data, tKey }) {
             <div style={{textAlign:"right"}}><ContactRow col="#374151" size={10.5}/></div>
           </div>
         </div>
-        <div style={{display:"grid",gridTemplateColumns:"1fr 180px",gap:"0 24px"}}>
-          <div>
-            {data.summary&&<><SecHead title="Summary" accent={t.accent}/><p style={{margin:"0 0 4px",fontSize:12,color:"#374151",lineHeight:1.75}}>{data.summary}</p></>}
-            {mainSections.filter(s=>!["skills","languages"].includes(s)).map(id=>renderSection(id,data,t,"#1e293b",t.accent))}
-          </div>
-          <div>{renderSidebarSkills(data,t.accent,"#1e293b")}</div>
+        <div>
+          {data.summary&&<><SecHead title="Summary" accent={t.accent}/><p style={{margin:"0 0 4px",fontSize:12,color:"#374151",lineHeight:1.75}}>{data.summary}</p></>}
+          {order.map(id=>renderSection(id,data,t,"#1e293b",t.accent))}
         </div>
       </div>
     );
