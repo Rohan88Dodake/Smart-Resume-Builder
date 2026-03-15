@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import AIAssistant from "./components/AIAssistant";
-import html2pdf from "html2pdf.js";
 
 /* ═══════════════════════════════ FONTS ═══════════════════════════════ */
 const Fonts = () => (
@@ -768,35 +767,34 @@ export default function App() {
   const element = document.getElementById("resume-print-area");
   if (!element) { alert("Resume not found."); return; }
 
-  setDownloading(true);
+  const printWindow = window.open("", "_blank", "width=900,height=600");
+  printWindow.document.write(`<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>${resume.personal.name || "Resume"}</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;600;700;900&family=Syne:wght@400;600;700;800&family=Lora:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=Bebas+Neue&family=Cormorant+Garamond:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; color-adjust:exact !important; }
+  html, body { width:210mm; background:white; }
+  @page { size:A4 portrait; margin:0; }
+  @media print {
+    * { overflow:visible !important; max-height:none !important; height:auto !important; }
+    html, body { width:210mm; }
+  }
+</style>
+</head>
+<body>${element.innerHTML}</body>
+</html>`);
+  printWindow.document.close();
 
-  const opt = {
-    margin: 0,
-    filename: `${resume.personal.name || "Resume"}_Resume.pdf`,
-    image: { type: "jpeg", quality: 1.0 },
-    html2canvas: {
-      scale: 2,
-      useCORS: true,
-      allowTaint: true,
-      scrollX: 0,
-      scrollY: 0,
-      windowWidth: element.scrollWidth,
-      windowHeight: element.scrollHeight,
-    },
-    jsPDF: {
-      unit: "mm",
-      format: "a4",
-      orientation: "portrait",
-    },
-    pagebreak: { mode: ["avoid-all", "css", "legacy"] },
+  printWindow.onload = () => {
+    setTimeout(() => {
+      printWindow.focus();
+      printWindow.print();
+      printWindow.close();
+    }, 1500);
   };
-
-  html2pdf()
-    .set(opt)
-    .from(element)
-    .save()
-    .then(() => setDownloading(false))
-    .catch(() => setDownloading(false));
 };
   // Build resume text for AI context
   const resumeTextForAI = [
