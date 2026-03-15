@@ -730,48 +730,196 @@ export default function App() {
   const EXP_ACCENT="#3b82f6", EDU_ACCENT="#059669", PROJ_ACCENT="#7c3aed", CERT_ACCENT="#dc2626", EC_ACCENT="#0e7490", LANG_ACCENT="#15803d", AWD_ACCENT="#b45309", VOL_ACCENT="#be123c";
 
  
- const downloadPDF = () => {
-  const element = document.getElementById("resume-print-area");
-  if (!element) { alert("Resume not found."); return; }
-
+ const downloadPDF = async () => {
   setDownloading(true);
+  const loadScript = (src) => new Promise((res, rej) => {
+    if (document.querySelector(`script[src="${src}"]`)) { res(); return; }
+    const s = document.createElement("script");
+    s.src = src; s.onload = res; s.onerror = rej;
+    document.head.appendChild(s);
+  });
+  try {
+    await loadScript("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js");
+    await loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
 
-  // Create hidden iframe instead of popup window (works on Vercel)
-  const iframe = document.createElement("iframe");
-  iframe.style.cssText = "position:fixed;top:-9999px;left:-9999px;width:210mm;height:297mm;border:none;";
-  document.body.appendChild(iframe);
+    const element = document.getElementById("resume-print-area");
+    if (!element) { alert("Resume not found."); setDownloading(false); return; }
 
-  const doc = iframe.contentDocument || iframe.contentWindow.document;
-  doc.open();
-  doc.write(`<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8"/>
-<title>${resume.personal.name || "Resume"}</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;600;700;900&family=Syne:wght@400;600;700;800&family=Lora:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=Bebas+Neue&family=Cormorant+Garamond:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-<style>
-  * { margin:0; padding:0; box-sizing:border-box; -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; color-adjust:exact !important; }
-  html, body { width:210mm; background:white; }
-  @page { size:A4 portrait; margin:0; }
-  @media print {
-    * { overflow:visible !important; max-height:none !important; }
-    html, body { width:210mm; }
-  }
-</style>
-</head>
-<body>${element.innerHTML}</body>
-</html>`);
-  doc.close();
+    const canvas = await window.html2canvas(element, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: "#ffffff",
+      width: element.scrollWidth,
+      height: element.scrollHeight,
+      scrollX: 0,
+      scrollY: 0,
+    });
 
-  // Wait for fonts to load then print
-  setTimeout(() => {
-    iframe.contentWindow.focus();
-    iframe.contentWindow.print();
-    setTimeout(() => {
-      document.body.removeChild(iframe);
-      setDownloading(false);
-    }, 1000);
-  }, 1500);
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
+    const pdfW = pdf.internal.pageSize.getWidth();
+    const pdfH = pdf.internal.pageSize.getHeight();
+    const imgData = canvas.toDataURL("image/jpeg", 1.0);
+    const imgH = (canvas.height * pdfW) / canvas.width;
+    let y = 0;
+    while (y < imgH) {
+      pdf.addImage(imgData, "JPEG", 0, -y, pdfW, imgH);
+      if (y + pdfH < imgH) pdf.addPage();
+      y += pdfH;
+    }
+    pdf.save(`${(resume.personal.name || "Resume").replace(/\s+/g,"_")}_Resume.pdf`);
+  } catch(e) { alert("PDF failed: " + e.message); }
+  setDownloading(false);
+};
+
+const downloadWord = async () => {
+  try {
+    const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle, Table, TableRow, TableCell, WidthType } = await import("docx");
+    const { saveAs } = await import("file-saver");
+
+    const p = resume.personal;
+    const ac = "2563EB";
+
+    const makeLine = (text, bold=false, size=22, color="000000") =>
+      new Paragraph({
+        children: [new TextRun({ text: text||"", bold, size, color, font:"Calibri" })],
+      });
+
+    const makeHeading = (title) => new Paragraph({
+      children: [new TextRun({ text: title.toUpperCase(), bold:true, size:20, color:ac, font:"Calibri" })],
+      border: { bottom: { style: BorderStyle.SINGLE, size:1, color:ac } },
+      spacing: { before:200, after:100 },
+    });
+
+    const sections = [];
+
+    // ── HEADER ──
+    sections.push(new Paragraph({
+      children: [new TextRun({ text: p.name||"Your Name", bold:true, size:40, font:"Calibri" })],
+      alignment: AlignmentType.CENTER,
+    }));
+
+    if (p.title) sections.push(new Paragraph({
+      children: [new TextRun({ text: p.title, size:24, color:"555555", font:"Calibri" })],
+      alignment: AlignmentType.CENTER,
+    }));
+
+    const contactParts = [p.email, p.phone, p.location, p.linkedin, p.github].filter(Boolean);
+    sections.push(new Paragraph({
+      children: [new TextRun({ text: contactParts.join(" | "), size:18, color:"555555", font:"Calibri" })],
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 200 },
+    }));
+
+    // ── SUMMARY ──
+    if (resume.summary) {
+      sections.push(makeHeading("Profile Summary"));
+      sections.push(makeLine(resume.summary, false, 20));
+    }
+
+    // ── EXPERIENCE ──
+    if (resume.experience?.length) {
+      sections.push(makeHeading("Work Experience"));
+      resume.experience.forEach(e => {
+        sections.push(new Paragraph({
+          children: [
+            new TextRun({ text: e.role||"", bold:true, size:22, font:"Calibri" }),
+            new TextRun({ text: `  |  ${e.company||""}`, size:22, color:"555555", font:"Calibri" }),
+            new TextRun({ text: `  ${e.start}${e.start?" – ":""}${e.current?"Present":e.end}`, size:20, color:"888888", font:"Calibri" }),
+          ],
+        }));
+        e.points?.filter(Boolean).forEach(pt => {
+          sections.push(new Paragraph({
+            children: [new TextRun({ text: `• ${pt}`, size:20, font:"Calibri" })],
+            spacing: { before:40 },
+          }));
+        });
+        sections.push(makeLine("", false, 10));
+      });
+    }
+
+    // ── EDUCATION ──
+    if (resume.education?.length) {
+      sections.push(makeHeading("Education"));
+      resume.education.forEach(e => {
+        sections.push(new Paragraph({
+          children: [
+            new TextRun({ text: e.degree||"", bold:true, size:22, font:"Calibri" }),
+            new TextRun({ text: `  |  ${e.school||""}`, size:20, color:"555555", font:"Calibri" }),
+            new TextRun({ text: e.gpa ? `  |  GPA: ${e.gpa}` : "", size:20, color:"888888", font:"Calibri" }),
+            new TextRun({ text: `  ${e.year||""}`, size:20, color:"888888", font:"Calibri" }),
+          ],
+          spacing: { after:80 },
+        }));
+      });
+    }
+
+    // ── PROJECTS ──
+    if (resume.projects?.length) {
+      sections.push(makeHeading("Projects"));
+      resume.projects.forEach(pr => {
+        sections.push(new Paragraph({
+          children: [
+            new TextRun({ text: pr.name||"", bold:true, size:22, font:"Calibri" }),
+            pr.tech ? new TextRun({ text: `  [${pr.tech}]`, size:20, color:"555555", font:"Calibri" }) : new TextRun(""),
+          ],
+        }));
+        if (pr.desc) sections.push(makeLine(`  ${pr.desc}`, false, 20, "444444"));
+        sections.push(makeLine("", false, 10));
+      });
+    }
+
+    // ── SKILLS ──
+    if (resume.skills?.length) {
+      sections.push(makeHeading("Skills"));
+      sections.push(makeLine(resume.skills.join("  •  "), false, 20));
+    }
+
+    // ── CERTIFICATIONS ──
+    if (resume.certifications?.length) {
+      sections.push(makeHeading("Certifications"));
+      resume.certifications.forEach(c => {
+        sections.push(new Paragraph({
+          children: [
+            new TextRun({ text: c.name||"", bold:true, size:22, font:"Calibri" }),
+            new TextRun({ text: `  |  ${c.issuer||""}`, size:20, color:"555555", font:"Calibri" }),
+            new TextRun({ text: `  ${c.year||""}`, size:20, color:"888888", font:"Calibri" }),
+          ],
+          spacing: { after:80 },
+        }));
+      });
+    }
+
+    // ── AWARDS ──
+    if (resume.awards?.length) {
+      sections.push(makeHeading("Awards & Honors"));
+      resume.awards.forEach(a => {
+        sections.push(new Paragraph({
+          children: [
+            new TextRun({ text: a.title||"", bold:true, size:22, font:"Calibri" }),
+            new TextRun({ text: `  |  ${a.org||""}  ${a.year||""}`, size:20, color:"555555", font:"Calibri" }),
+          ],
+        }));
+        if (a.desc) sections.push(makeLine(`  ${a.desc}`, false, 20, "444444"));
+      });
+    }
+
+    // ── LANGUAGES ──
+    if (resume.languages?.length) {
+      sections.push(makeHeading("Languages"));
+      sections.push(makeLine(resume.languages.map(l=>`${l.lang} (${l.level})`).join("  •  "), false, 20));
+    }
+
+    // ── CREATE DOC ──
+    const doc = new Document({
+      sections: [{ properties: {}, children: sections }],
+    });
+
+    const blob = await Packer.toBlob(doc);
+    saveAs(blob, `${(resume.personal.name||"Resume").replace(/\s+/g,"_")}_Resume.docx`);
+
+  } catch(e) { alert("Word download failed: " + e.message); }
 };
   // Build resume text for AI context
   const resumeTextForAI = [
@@ -801,8 +949,14 @@ export default function App() {
           {view==="split"?"👁 Full Preview":"✏️ Edit"}
         </button>
         <button onClick={downloadPDF} disabled={downloading} style={{padding:"6px 14px",background:downloading?"#374151":"linear-gradient(135deg,#059669,#0d9488)",color:"#fff",border:"none",borderRadius:8,fontSize:12,cursor:downloading?"not-allowed":"pointer",fontWeight:700,display:"flex",alignItems:"center",gap:5,opacity:downloading?0.7:1}}>
-          {downloading?"⏳ Preparing...":"⬇️ Download PDF"}
+          {downloading?"⏳ Preparing...":"⬇️ PDF"}
+          </button>
+
+        <button onClick={downloadWord}
+        style={{padding:"6px 14px",background:"linear-gradient(135deg,#2563eb,#1d4ed8)",color:"#fff",border:"none",borderRadius:8,fontSize:12,cursor:"pointer",fontWeight:700}}>
+         📄 Word
         </button>
+        
         {/* ── AI BUTTON ── */}
         <button onClick={()=>setShowAI(s=>!s)} style={{padding:"6px 14px",background:showAI?"#7c3aed":"#4c1d95",color:"#ede9fe",border:`1.5px solid ${showAI?"#a78bfa":"#6d28d9"}`,borderRadius:8,fontSize:12,cursor:"pointer",fontWeight:700,transition:"all 0.2s"}}>
           🤖 AI {showAI?"▲":"▼"}
