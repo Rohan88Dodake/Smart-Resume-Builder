@@ -764,25 +764,39 @@ export default function App() {
   const EXP_ACCENT="#3b82f6", EDU_ACCENT="#059669", PROJ_ACCENT="#7c3aed", CERT_ACCENT="#dc2626", EC_ACCENT="#0e7490", LANG_ACCENT="#15803d", AWD_ACCENT="#b45309", VOL_ACCENT="#be123c";
 
  
-    const downloadPDF = () => {
+  const downloadPDF = () => {
   const element = document.getElementById("resume-print-area");
+  if (!element) { alert("Resume not found."); return; }
+
+  setDownloading(true);
 
   const opt = {
     margin: 0,
-    filename: `${resume.personal.name || "resume"}.pdf`,
-    image: { type: "jpeg", quality: 1 },
-    html2canvas: { scale: 2, useCORS: true },
+    filename: `${resume.personal.name || "Resume"}_Resume.pdf`,
+    image: { type: "jpeg", quality: 1.0 },
+    html2canvas: {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      scrollX: 0,
+      scrollY: 0,
+      windowWidth: element.scrollWidth,
+      windowHeight: element.scrollHeight,
+    },
     jsPDF: {
       unit: "mm",
       format: "a4",
-      orientation: "portrait"
-    }
+      orientation: "portrait",
+    },
+    pagebreak: { mode: ["avoid-all", "css", "legacy"] },
   };
 
-  html2pdf().set(opt).from(element).save();
-};
-
-  html2pdf().set(opt).from(element).save();
+  html2pdf()
+    .set(opt)
+    .from(element)
+    .save()
+    .then(() => setDownloading(false))
+    .catch(() => setDownloading(false));
 };
   // Build resume text for AI context
   const resumeTextForAI = [
@@ -1002,81 +1016,84 @@ export default function App() {
           )}
 
           {/* RIGHT PREVIEW */}
-{/* RIGHT PREVIEW */}
-<div
-  style={{
-    flex: 1,
-    overflowY: "auto",
-    background: "#e2e8f0",
-    padding: 20,
-    display: "flex",
-    justifyContent: "center"
-  }}
->
+  {/* RIGHT PREVIEW */}
+  <div
+    style={{
+      flex: 1,
+      overflowY: "auto",
+      background: "#e2e8f0",
+      padding: 20,
+      display: "flex",
+      justifyContent: "center"
+    }}
+  >
 
-  <div style={{ width: "210mm" }}>
+    <div style={{ width: "210mm" }}>
 
-    <div
-      style={{
-        background: "#fff",
-        boxShadow: "0 8px 40px rgba(0,0,0,0.15)"
-      }}
-    >
-
-      {/* Preview Header */}
       <div
         style={{
-          background: "#f8fafc",
-          padding: "8px 16px",
-          borderBottom: "1px solid #e2e8f0",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center"
+          background: "#fff",
+          boxShadow: "0 8px 40px rgba(0,0,0,0.15)"
         }}
       >
-        <span
-          style={{
-            fontSize: 11,
-            fontWeight: 700,
-            color: "#94a3b8",
-            textTransform: "uppercase",
-            letterSpacing: 1
-          }}
-        >
-          Live Preview · {T[resume.template]?.name || "Template"}
-        </span>
 
+        {/* Preview Header */}
         <div
           style={{
-            width: 10,
-            height: 10,
-            borderRadius: "50%",
-            background: T[resume.template]?.accent || "#3b82f6"
+            background: "#f8fafc",
+            padding: "8px 16px",
+            borderBottom: "1px solid #e2e8f0",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center"
           }}
-        />
-      </div>
+        >
+          <span
+            style={{
+              fontSize: 11,
+              fontWeight: 700,
+              color: "#94a3b8",
+              textTransform: "uppercase",
+              letterSpacing: 1
+            }}
+          >
+            Live Preview · {T[resume.template]?.name || "Template"}
+          </span>
 
-      {/* PRINT AREA */}
-   <div
+          <div
+            style={{
+              width: 10,
+              height: 10,
+              borderRadius: "50%",
+              background: T[resume.template]?.accent || "#3b82f6"
+            }}
+          />
+        </div>
+
+        {/* PRINT AREA */}
+  <div
   id="resume-print-area"
   style={{
     width:"210mm",
     background:"#fff",
-    padding:"20mm"
+    margin:"0 auto"
   }}
 >
-        <ResumePreview
-          data={resume}
-          tKey={resume.template}
-        />
+
+
+          <ResumePreview
+            data={resume}
+            tKey={resume.template}
+          />
+        </div>
+
       </div>
 
     </div>
 
   </div>
-
-</div>
-        </div>
-      )}
-    </div>
-  );
+          </div>
+        )}
+      </div>
+    );
+  }
