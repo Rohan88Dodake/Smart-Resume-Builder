@@ -515,7 +515,7 @@ function AuthScreen({ onLogin }) {
       <div style={{background:"#fff",borderRadius:22,width:"100%",maxWidth:420,boxShadow:"0 30px 80px rgba(0,0,0,0.35)",overflow:"hidden"}}>
         <div style={{background:"linear-gradient(135deg,#0f172a,#1e3a5f)",padding:"32px 36px 28px",textAlign:"center"}}>
           <div style={{fontSize:40,marginBottom:10}}>📄</div>
-          <h1 style={{margin:0,color:"#fff",fontSize:24,fontWeight:800,fontFamily:"'Playfair Display',serif"}}>Smart Resume Builder With AI</h1>
+          <h1 style={{margin:0,color:"#fff",fontSize:24,fontWeight:800,fontFamily:"'Playfair Display',serif"}}>Smart Resume Builder With AI Assistant</h1>
           <p style={{margin:"6px 0 0",color:"rgba(255,255,255,0.5)",fontSize:13}}>30 templates · All sections · Drag to reorder</p>
         </div>
         <div style={{padding:"28px 32px 32px"}}>
@@ -1144,7 +1144,7 @@ const downloadWord = async () => {
             </div>
           )}
 
-          {/* RIGHT PREVIEW */}
+         
   {/* RIGHT PREVIEW */}
   <div
     style={{
