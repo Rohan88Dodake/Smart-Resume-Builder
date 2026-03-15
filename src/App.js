@@ -47,8 +47,6 @@ const T = {
   bordeaux:  { name:"Bordeaux",       cat:"Luxury",     accent:"#9f1239", hdr:"#4c0519",     hdrTxt:"#fce7f3",     main:"#fff1f2",  layout:"bold", font:"Cormorant Garamond" },
   graphite:  { name:"Graphite",       cat:"Tech",       accent:"#6b7280", hdr:"#1f2937",     hdrTxt:"#e5e7eb",     main:"#f9fafb",  layout:"bold", font:"Space Grotesk" },
   sky2:      { name:"Cloud White",    cat:"Minimal",    accent:"#3b82f6", hdr:"#eff6ff",     hdrTxt:"#1d4ed8",     main:"#fff",     layout:"line", font:"DM Sans" },
- 
-  // ── 20 NEW TEMPLATES ──
   navy:      { name:"Navy Executive", cat:"Executive",  accent:"#1e40af", sidebar:"#1e3a8a", sidebarTxt:"#bfdbfe", main:"#f0f4ff",  layout:"sl", font:"Raleway" },
   rosegold:  { name:"Rose Gold",      cat:"Luxury",     accent:"#be185d", hdr:"#fdf2f8",     hdrTxt:"#831843",     main:"#fff",     layout:"line", font:"Cormorant Garamond" },
   plum:      { name:"Deep Plum",      cat:"Luxury",     accent:"#7e22ce", sidebar:"#3b0764", sidebarTxt:"#e9d5ff", main:"#faf5ff",  layout:"sl", font:"Nunito" },
@@ -283,42 +281,11 @@ const renderSection = (id, data, t, textCol, accentCol) => {
   return null;
 };
 
-const renderSidebarSkills = (data, ac, sidebarTxt) => {
-  if (!data.skills?.length && !data.languages?.length) return null;
-  return (
-    <>
-      {data.skills?.length > 0 && <>
-        <div style={{borderTop:`1px solid ${ac}25`,paddingTop:12,marginTop:12}}>
-          <p style={{margin:"0 0 8px",fontSize:8,fontWeight:800,textTransform:"uppercase",letterSpacing:1.8,color:`${sidebarTxt}55`}}>Skills</p>
-          {data.skills.map((s,i)=>(
-            <div key={i} style={{display:"flex",alignItems:"center",gap:6,marginBottom:5}}>
-              <div style={{width:5,height:5,borderRadius:"50%",background:ac,flexShrink:0}}/>
-              <span style={{fontSize:11,color:sidebarTxt,opacity:0.85,lineHeight:1.3}}>{s}</span>
-            </div>
-          ))}
-        </div>
-      </>}
-      {data.languages?.length > 0 && <>
-        <div style={{borderTop:`1px solid ${ac}25`,paddingTop:12,marginTop:12}}>
-          <p style={{margin:"0 0 8px",fontSize:8,fontWeight:800,textTransform:"uppercase",letterSpacing:1.8,color:`${sidebarTxt}55`}}>Languages</p>
-          {data.languages.map((l,i)=>(
-            <div key={i} style={{marginBottom:5}}>
-              <span style={{fontSize:11,color:sidebarTxt,opacity:0.85,fontWeight:600}}>{l.lang}</span>
-              {l.level&&<span style={{fontSize:10,color:ac,marginLeft:4,opacity:0.8}}>· {l.level}</span>}
-            </div>
-          ))}
-        </div>
-      </>}
-    </>
-  );
-};
-
 /* ═══════════════════════ RESUME PREVIEW ════════════════════════════ */
 function ResumePreview({ data, tKey }) {
   const t = T[tKey] || T.midnight;
   const p = data.personal;
   const order = (data.sectionOrder || []).filter(id => !(data.hiddenSections||[]).includes(id));
-  const mainSections = order.filter(id => !["skills","languages"].includes(id));
   const font = t.font || "DM Sans";
 
   const ContactRow = ({col="#fff", size=11}) => (
