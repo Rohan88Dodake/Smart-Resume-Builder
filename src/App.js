@@ -763,12 +763,20 @@ export default function App() {
   const EXP_ACCENT="#3b82f6", EDU_ACCENT="#059669", PROJ_ACCENT="#7c3aed", CERT_ACCENT="#dc2626", EC_ACCENT="#0e7490", LANG_ACCENT="#15803d", AWD_ACCENT="#b45309", VOL_ACCENT="#be123c";
 
  
-  const downloadPDF = () => {
+ const downloadPDF = () => {
   const element = document.getElementById("resume-print-area");
   if (!element) { alert("Resume not found."); return; }
 
-  const printWindow = window.open("", "_blank", "width=900,height=600");
-  printWindow.document.write(`<!DOCTYPE html>
+  setDownloading(true);
+
+  // Create hidden iframe instead of popup window (works on Vercel)
+  const iframe = document.createElement("iframe");
+  iframe.style.cssText = "position:fixed;top:-9999px;left:-9999px;width:210mm;height:297mm;border:none;";
+  document.body.appendChild(iframe);
+
+  const doc = iframe.contentDocument || iframe.contentWindow.document;
+  doc.open();
+  doc.write(`<!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8"/>
@@ -779,22 +787,24 @@ export default function App() {
   html, body { width:210mm; background:white; }
   @page { size:A4 portrait; margin:0; }
   @media print {
-    * { overflow:visible !important; max-height:none !important; height:auto !important; }
+    * { overflow:visible !important; max-height:none !important; }
     html, body { width:210mm; }
   }
 </style>
 </head>
 <body>${element.innerHTML}</body>
 </html>`);
-  printWindow.document.close();
+  doc.close();
 
-  printWindow.onload = () => {
+  // Wait for fonts to load then print
+  setTimeout(() => {
+    iframe.contentWindow.focus();
+    iframe.contentWindow.print();
     setTimeout(() => {
-      printWindow.focus();
-      printWindow.print();
-      printWindow.close();
-    }, 1500);
-  };
+      document.body.removeChild(iframe);
+      setDownloading(false);
+    }, 1000);
+  }, 1500);
 };
   // Build resume text for AI context
   const resumeTextForAI = [
