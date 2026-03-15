@@ -745,34 +745,69 @@ export default function App() {
     const element = document.getElementById("resume-print-area");
     if (!element) { alert("Resume not found."); setDownloading(false); return; }
 
-    const canvas = await window.html2canvas(element, {
-      scale: 2,
+    // A4 dimensions in pixels at 96dpi
+    const A4_WIDTH_PX = 794;
+    const A4_HEIGHT_PX = 1123;
+
+    // Create scaled wrapper to fit content into one A4 page
+    const wrapper = document.createElement("div");
+    const contentHeight = element.scrollHeight;
+    const scale = contentHeight > A4_HEIGHT_PX ? A4_HEIGHT_PX / contentHeight : 1;
+
+    wrapper.style.cssText = `
+      position: fixed;
+      top: -99999px;
+      left: 0;
+      width: ${A4_WIDTH_PX}px;
+      height: ${A4_HEIGHT_PX}px;
+      overflow: hidden;
+      background: white;
+      z-index: -1;
+    `;
+
+    const inner = document.createElement("div");
+    inner.style.cssText = `
+      width: ${A4_WIDTH_PX}px;
+      transform-origin: top left;
+      transform: scale(${scale});
+    `;
+    inner.innerHTML = element.innerHTML;
+    wrapper.appendChild(inner);
+    document.body.appendChild(wrapper);
+
+    await new Promise(r => setTimeout(r, 500));
+
+    const canvas = await window.html2canvas(wrapper, {
+      scale: 3,
       useCORS: true,
       allowTaint: true,
       backgroundColor: "#ffffff",
-      width: element.scrollWidth,
-      height: element.scrollHeight,
-      scrollX: 0,
-      scrollY: 0,
+      width: A4_WIDTH_PX,
+      height: A4_HEIGHT_PX,
+      windowWidth: A4_WIDTH_PX,
+      windowHeight: A4_HEIGHT_PX,
     });
 
+    document.body.removeChild(wrapper);
+
     const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
+    const pdf = new jsPDF({
+      unit: "mm",
+      format: "a4",
+      orientation: "portrait",
+    });
+
+    const imgData = canvas.toDataURL("image/jpeg", 1.0);
     const pdfW = pdf.internal.pageSize.getWidth();
     const pdfH = pdf.internal.pageSize.getHeight();
-    const imgData = canvas.toDataURL("image/jpeg", 1.0);
-    const imgH = (canvas.height * pdfW) / canvas.width;
-    let y = 0;
-    while (y < imgH) {
-      pdf.addImage(imgData, "JPEG", 0, -y, pdfW, imgH);
-      if (y + pdfH < imgH) pdf.addPage();
-      y += pdfH;
-    }
+
+    // Fit entire resume into exactly one page
+    pdf.addImage(imgData, "JPEG", 0, 0, pdfW, pdfH);
     pdf.save(`${(resume.personal.name || "Resume").replace(/\s+/g,"_")}_Resume.pdf`);
+
   } catch(e) { alert("PDF failed: " + e.message); }
   setDownloading(false);
 };
-
 const downloadWord = async () => {
   try {
     const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle, Table, TableRow, TableCell, WidthType } = await import("docx");
