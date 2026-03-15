@@ -778,7 +778,7 @@ export default function App() {
     await new Promise(r => setTimeout(r, 500));
 
     const canvas = await window.html2canvas(wrapper, {
-      scale: 3,
+      scale: 6,
       useCORS: true,
       allowTaint: true,
       backgroundColor: "#ffffff",
