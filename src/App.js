@@ -999,8 +999,8 @@ const downloadWord = async () => {
         <button onClick={logout} style={{padding:"6px 12px",background:"#7f1d1d",color:"#fee2e2",border:"none",borderRadius:8,fontSize:12,cursor:"pointer",fontWeight:600}}>Logout</button>
       </div>
     {view==="preview" ? (
-  <div style={{flex:1,overflowY:"auto",padding:24,display:"flex",justifyContent:"center",background:"#e2e8f0"}}>
-    <div ref={previewRef} id="resume-print-area" style={{width:"210mm",background:"#fff",boxShadow:"0 10px 60px rgba(0,0,0,0.2)",borderRadius:4}}>
+<div style={{flex:1,overflowY:"auto",overflowX:"hidden",padding:24,display:"flex",justifyContent:"center",alignItems:"flex-start",background:"#e2e8f0"}}>
+<div ref={previewRef} id="resume-print-area" style={{width:"210mm",background:"#fff",boxShadow:"0 10px 60px rgba(0,0,0,0.2)",borderRadius:4}}>
       <ResumePreview data={resume} tKey={resume.template}/>
     </div>
   </div>
@@ -1188,11 +1188,12 @@ const downloadWord = async () => {
       background: "#e2e8f0",
       padding: 20,
       display: "flex",
-      justifyContent: "center"
+      justifyContent: "center",
+       alignItems: "flex-start"
     }}
   >
 
-    <div style={{ width: "210mm" }}>
+    <div style={{ width: "100%", maxWidth: "210mm" }}>
 
       <div
         style={{
